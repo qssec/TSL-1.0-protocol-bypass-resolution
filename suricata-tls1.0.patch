@@ -1,0 +1,1675 @@
+diff --git a/configure.ac b/configure.ac
+index 3d3ec61..86f0b8f 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1963,6 +1963,48 @@
+         LDFLAGS="${LDFLAGS} -pie"
+     fi
+ 
++#ENABLE tls-decode
++    AC_ARG_ENABLE(tls_decode,
++	        AS_HELP_STRING([--enable-tls-decode],[Enable tls-decode RSA support]),
++	        [ enable_tls_decode="yes"],
++	        [ enable_tls_decode="no"])
++    AC_ARG_WITH(libopenssl_includes,
++            [  --with-libopenssl-includes=DIR  openssl-1.0.2o include directory],
++            [with_libopenssl_includes="$withval"],[with_libopenssl_includes="no"])
++    AC_ARG_WITH(libopenssl_libraries,
++            [  --with-libopenssl-libraries=DIR    openssl-1.0.2o library directory],
++            [with_libopenssl_libraries="$withval"],[with_libopenssl_libraries="no"])
++
++    if test "$enable_tls_decode" = "yes"; then
++        if test "$with_libopenssl_includes" != "no"; then
++            CPPFLAGS="${CPPFLAGS} -I${with_libopenssl_includes}"
++        else
++            echo
++            echo "   ERROR!  libopenssl includes not found, go get it,and
++            install at user working path!"
++            echo
++            echo "   from https://www.openssl.org/source/old/1.0.2/openssl-1.0.2o.tar.gz or your distribution:"
++            echo
++            exit 1
++
++        fi
++
++        if test "$with_libopenssl_libraries" != "no"; then
++            LIBS="${LIBS} ${with_libopenssl_libraries}/libssl.a ${with_libopenssl_libraries}/libcrypto.a -ldl"
++        else
++            echo
++            echo "   ERROR!  libopenssl library not found, go get it,and
++            install at user working path!"
++            echo
++            echo "   from https://www.openssl.org/source/old/1.0.2/openssl-1.0.2o.tar.gz or your distribution:"
++            echo
++            exit 1
++
++        fi
++        AC_DEFINE([HAVE_TLS_DECODE],[1],[TLS_decode available])
++    fi
++
++
+ # libhiredis
+     AC_ARG_ENABLE(hiredis,
+ 	        AS_HELP_STRING([--enable-hiredis],[Enable Redis support]),
+diff --git a/server.key b/server.key
+new file mode 100644
+index 0000000..dbd403d
+--- /dev/null
++++ b/server.key
+@@ -0,0 +1,27 @@
++-----BEGIN RSA PRIVATE KEY-----
++MIIEpAIBAAKCAQEA84TzkjbcskbKZnrlKcXzSSgi07n+4N7kOM7uIhzpkTuU0HIv
++h4VZS2axxfV6hV3CD9MuKVg2zEhroqK1Js5n4ke230nSP/qiELfCl0R+hzRtbfKL
++tFUr1iHeU0uQ6v3q+Tg1K/Tmmg72uxKrhyHDL7z0BriPjhAHJ5XlQsvR1RCMkqzu
++D9wjSInJxpMMIgLndOclAKv4D1wQtYU7ZpTw+01XBlUhIiXb86qpYL9NqnnRq5JI
++uhmOEuxo2ca63+xaHNhD/udSyc8C0Md/yX6wlONTRFgLLv0pdLUGm1xEjfsydaQ6
++qGd7hzIKUI3hohNKJa/mHLElv7SZolPTogK/EQIDAQABAoIBAADq9FwNtuE5IRQn
++zGtO4q7Y5uCzZ8GDNYr9RKp+P2cbuWDbvVAecYq2NV9QoIiWJOAYZKklOvekIju3
++r0UZLA0PRiIrTg6NrESx3JrjWDK8QNlUO7CPTZ39/K+FrmMkV9lem9yxjJjyC34D
++AQB+YRTx+l14HppjdxNwHjAVQpIx/uO2F5xAMuk32+3K+pq9CZUtrofe1q4Agj9R
++5s8mSy9pbRo9kW9wl5xdEotz1LivFOEiqPUJTUq5J5PeMKao3vdK726XI4Z455Nm
++W2/MA0YV0ug2FYinHcZdvKM6dimH8GLfa3X8xKRfzjGjTiMSwsdjgMa4awY3tEHH
++674jhAECgYEA/zqMrc0zsbNk83sjgaYIug5kzEpN4ic020rSZsmQxSCerJTgNhmg
++utKSCt0Re09Jt3LqG48msahX8ycqDsHNvlEGPQSbMu9IYeO3Wr3fAm75GEtFWePY
++BhM73I7gkRt4s8bUiUepMG/wY45c5tRF23xi8foReHFFe9MDzh8fJFECgYEA9EFX
++4qAik1pOJGNei9BMwmx0I0gfVEIgu0tzeVqT45vcxbxr7RkTEaDoAG6PlbWP6D9a
++WQNLp4gsgRM90ZXOJ4up5DsAWDluvaF4/omabMA+MJJ5kGZ0gCj5rbZbKqUws7x8
++bp+6iBfUPJUbcqNqFmi/08Yt7vrDnMnyMw2A/sECgYEAiiuRMxnuzVm34hQcsbhH
++6ymVqf7j0PW2qK0F4H1ocT9qhzWFd+RB3kHWrCjnqODQoI6GbGr/4JepHUpre1ex
++4UEN5oSS3G0ru0rC3U4C59dZ5KwDHFm7ffZ1pr52ljfQDUsrjjIMRtuiwNK2OoRa
++WSsqiaL+SDzSB+nBmpnAizECgYBdt/y6rerWUx4MhDwwtTnel7JwHyo2MDFS6/5g
++n8qC2Lj6/fMDRE22w+CA2esp7EJNQJGv+b27iFpbJEDh+/Lf5YzIT4MwVskQ5bYB
++JFcmRxUVmf4e09D7o705U/DjCgMH09iCsbLmqQ38ONIRSHZaJtMDtNTHD1yi+jF+
++OT43gQKBgQC/2OHZoko6iRlNOAQ/tMVFNq7fL81GivoQ9F1U0Qr+DH3ZfaH8eIkX
++xT0ToMPJUzWAn8pZv0snA0um6SIgvkCuxO84OkANCVbttzXImIsL7pFzfcwV/ERK
++UM6j0ZuSMFOCr/lGPAoOQU0fskidGEHi1/kW+suSr28TqsyYZpwBDQ==
++-----END RSA PRIVATE KEY-----
+diff --git a/src/app-layer-ssl.c b/src/app-layer-ssl.c
+index 58f54fe..257701d 100644
+--- a/src/app-layer-ssl.c
++++ b/src/app-layer-ssl.c
+@@ -52,6 +52,187 @@
+ #include "flow-util.h"
+ #include "flow-private.h"
+ 
++#ifdef HAVE_TLS_DECODE
++static SSL_CipherSuite CipherSuites[]={
++     {1,KEX_RSA,SIG_RSA,ENC_NULL,0,0,0,DIG_MD5,16,0},
++     {2,KEX_RSA,SIG_RSA,ENC_NULL,0,0,0,DIG_SHA,20,0},
++     {3,KEX_RSA,SIG_RSA,ENC_RC4,1,128,40,DIG_MD5,16,1},
++     {4,KEX_RSA,SIG_RSA,ENC_RC4,1,128,128,DIG_MD5,16,0},
++     {5,KEX_RSA,SIG_RSA,ENC_RC4,1,128,128,DIG_SHA,20,0},
++     {6,KEX_RSA,SIG_RSA,ENC_RC2,8,128,40,DIG_SHA,20,1},
++     {7,KEX_RSA,SIG_RSA,ENC_IDEA,8,128,128,DIG_SHA,20,0},
++     {8,KEX_RSA,SIG_RSA,ENC_DES,8,64,40,DIG_SHA,20,1},
++     {9,KEX_RSA,SIG_RSA,ENC_DES,8,64,64,DIG_SHA,20,0},
++     {10,KEX_RSA,SIG_RSA,ENC_3DES,8,192,192,DIG_SHA,20,0},
++     {11,KEX_DH,SIG_DSS,ENC_DES,8,64,40,DIG_SHA,20,1},
++     {12,KEX_DH,SIG_DSS,ENC_DES,8,64,64,DIG_SHA,20,0},
++     {13,KEX_DH,SIG_DSS,ENC_3DES,8,192,192,DIG_SHA,20,0},
++     {14,KEX_DH,SIG_RSA,ENC_DES,8,64,40,DIG_SHA,20,1},
++     {15,KEX_DH,SIG_RSA,ENC_DES,8,64,64,DIG_SHA,20,0},
++     {16,KEX_DH,SIG_RSA,ENC_3DES,8,192,192,DIG_SHA,20,0},
++     {17,KEX_DH,SIG_DSS,ENC_DES,8,64,40,DIG_SHA,20,1},
++     {18,KEX_DH,SIG_DSS,ENC_DES,8,64,64,DIG_SHA,20,0},
++     {19,KEX_DH,SIG_DSS,ENC_3DES,8,192,192,DIG_SHA,20,0},
++     {20,KEX_DH,SIG_RSA,ENC_DES,8,64,40,DIG_SHA,20,1},
++     {21,KEX_DH,SIG_RSA,ENC_DES,8,64,64,DIG_SHA,20,0},
++     {22,KEX_DH,SIG_RSA,ENC_3DES,8,192,192,DIG_SHA,20,0},
++     {23,KEX_DH,SIG_NONE,ENC_RC4,1,128,40,DIG_MD5,16,1},
++     {24,KEX_DH,SIG_NONE,ENC_RC4,1,128,128,DIG_MD5,16,0},
++     {25,KEX_DH,SIG_NONE,ENC_DES,8,64,40,DIG_MD5,16,1},
++     {26,KEX_DH,SIG_NONE,ENC_DES,8,64,64,DIG_MD5,16,0},
++     {27,KEX_DH,SIG_NONE,ENC_3DES,8,192,192,DIG_MD5,16,0},
++     // Missing: 44-46
++     {47,KEX_RSA,SIG_RSA,ENC_AES128,16,128,128,DIG_SHA,20,0},
++     {48,KEX_DH,SIG_DSS,ENC_AES128,16,128,128,DIG_SHA,20,0},
++     {49,KEX_DH,SIG_RSA,ENC_AES128,16,128,128,DIG_SHA,20,0},
++     {50,KEX_DH,SIG_DSS,ENC_AES128,16,128,128,DIG_SHA,20,0},
++     {51,KEX_DH,SIG_RSA,ENC_AES128,16,128,128,DIG_SHA,20,0},
++     {52,KEX_DH,SIG_NONE,ENC_AES128,16,128,128,DIG_SHA,20,0},
++     {53,KEX_RSA,SIG_RSA,ENC_AES256,16,256,256,DIG_SHA,20,0},
++     {54,KEX_DH,SIG_DSS,ENC_AES256,16,256,256,DIG_SHA,20,0},
++     {55,KEX_DH,SIG_RSA,ENC_AES256,16,256,256,DIG_SHA,20,0},
++     {56,KEX_DH,SIG_DSS,ENC_AES256,16,256,256,DIG_SHA,20,0},
++     {57,KEX_DH,SIG_RSA,ENC_AES256,16,256,256,DIG_SHA,20,0},
++     {58,KEX_DH,SIG_NONE,ENC_AES256,16,256,256,DIG_SHA,20,0},
++     {59,KEX_RSA,SIG_RSA,ENC_NULL,0,0,0,DIG_SHA256,32,0},
++     {60,KEX_RSA,SIG_RSA,ENC_AES128,16,128,128,DIG_SHA256,32,0},
++     {61,KEX_RSA,SIG_RSA,ENC_AES256,16,256,256,DIG_SHA256,32,0},
++     {62,KEX_DH,SIG_DSS,ENC_AES128,16,128,128,DIG_SHA256,32,0},
++     {63,KEX_DH,SIG_RSA,ENC_AES128,16,128,128,DIG_SHA256,32,0},
++     {64,KEX_DH,SIG_DSS,ENC_AES128,16,128,128,DIG_SHA256,32,0},
++     {65,KEX_RSA,SIG_RSA,ENC_CAMELLIA128,16,128,128,DIG_SHA,20,0},
++     {66,KEX_DH,SIG_DSS,ENC_CAMELLIA128,16,128,128,DIG_SHA,20,0},
++     {67,KEX_DH,SIG_RSA,ENC_CAMELLIA128,16,128,128,DIG_SHA,20,0},
++     {68,KEX_DH,SIG_DSS,ENC_CAMELLIA128,16,128,128,DIG_SHA,20,0},
++     {69,KEX_DH,SIG_RSA,ENC_CAMELLIA128,16,128,128,DIG_SHA,20,0},
++     {70,KEX_DH,SIG_NONE,ENC_CAMELLIA128,16,128,128,DIG_SHA,20,0},
++     {96,KEX_RSA,SIG_RSA,ENC_RC4,1,128,56,DIG_MD5,16,1},
++     {97,KEX_RSA,SIG_RSA,ENC_RC2,1,128,56,DIG_MD5,16,1},
++     {98,KEX_RSA,SIG_RSA,ENC_DES,8,64,64,DIG_SHA,20,1},
++     {99,KEX_DH,SIG_DSS,ENC_DES,8,64,64,DIG_SHA,20,1},
++     {100,KEX_RSA,SIG_RSA,ENC_RC4,1,128,56,DIG_SHA,20,1},
++     {101,KEX_DH,SIG_DSS,ENC_RC4,1,128,56,DIG_SHA,20,1},
++     {102,KEX_DH,SIG_DSS,ENC_RC4,1,128,128,DIG_SHA,20,0},
++     {103,KEX_DH,SIG_RSA,ENC_AES128,16,128,128,DIG_SHA256,32,0},
++     {104,KEX_DH,SIG_DSS,ENC_AES256,16,256,256,DIG_SHA256,32,0},
++     {105,KEX_DH,SIG_RSA,ENC_AES256,16,256,256,DIG_SHA256,32,0},
++     {106,KEX_DH,SIG_DSS,ENC_AES256,16,256,256,DIG_SHA256,32,0},
++     {107,KEX_DH,SIG_RSA,ENC_AES256,16,256,256,DIG_SHA256,32,0},
++     {108,KEX_DH,SIG_NONE,ENC_AES128,16,128,128,DIG_SHA256,32,0},
++     {109,KEX_DH,SIG_NONE,ENC_AES256,16,256,256,DIG_SHA256,32,0},
++     {132,KEX_RSA,SIG_RSA,ENC_CAMELLIA256,16,256,256,DIG_SHA,20,0},
++     {133,KEX_DH,SIG_DSS,ENC_CAMELLIA256,16,256,256,DIG_SHA,20,0},
++     {134,KEX_DH,SIG_RSA,ENC_CAMELLIA256,16,256,256,DIG_SHA,20,0},
++     {135,KEX_DH,SIG_DSS,ENC_CAMELLIA256,16,256,256,DIG_SHA,20,0},
++     {136,KEX_DH,SIG_RSA,ENC_CAMELLIA256,16,256,256,DIG_SHA,20,0},
++     {137,KEX_DH,SIG_NONE,ENC_CAMELLIA256,16,256,256,DIG_SHA,20,0},
++     // Missing: 138-149
++     {150,KEX_RSA,SIG_RSA,ENC_SEED,16,128,128,DIG_SHA,20,0},
++     {151,KEX_DH,SIG_DSS,ENC_SEED,16,128,128,DIG_SHA,20,0},
++     {152,KEX_DH,SIG_RSA,ENC_SEED,16,128,128,DIG_SHA,20,0},
++     {153,KEX_DH,SIG_DSS,ENC_SEED,16,128,128,DIG_SHA,20,0},
++     {154,KEX_DH,SIG_RSA,ENC_SEED,16,128,128,DIG_SHA,20,0},
++     {155,KEX_DH,SIG_NONE,ENC_SEED,16,128,128,DIG_SHA,20,0},
++     {156,KEX_RSA,SIG_RSA,ENC_AES128_GCM,4,128,128,DIG_SHA256,32,0},
++     {157,KEX_RSA,SIG_RSA,ENC_AES256_GCM,4,256,256,DIG_SHA384,48,0},
++     {158,KEX_DH,SIG_RSA,ENC_AES128_GCM,4,128,128,DIG_SHA256,32,0},
++     {159,KEX_DH,SIG_RSA,ENC_AES256_GCM,4,256,256,DIG_SHA384,48,0},
++     {160,KEX_DH,SIG_RSA,ENC_AES128_GCM,4,128,128,DIG_SHA256,32,0},
++     {161,KEX_DH,SIG_RSA,ENC_AES256_GCM,4,256,256,DIG_SHA384,48,0},
++     {162,KEX_DH,SIG_DSS,ENC_AES128_GCM,4,128,128,DIG_SHA256,32,0},
++     {163,KEX_DH,SIG_DSS,ENC_AES256_GCM,4,256,256,DIG_SHA384,48,0},
++     {164,KEX_DH,SIG_DSS,ENC_AES128_GCM,4,128,128,DIG_SHA256,32,0},
++     {165,KEX_DH,SIG_DSS,ENC_AES256_GCM,4,256,256,DIG_SHA384,48,0},
++     {166,KEX_DH,SIG_NONE,ENC_AES128_GCM,4,128,128,DIG_SHA256,32,0},
++     {167,KEX_DH,SIG_NONE,ENC_AES256_GCM,4,256,256,DIG_SHA384,48,0},
++     // Missing: 168-185
++     {186,KEX_RSA,SIG_RSA,ENC_CAMELLIA128,16,128,128,DIG_SHA256,32,0},
++     {187,KEX_DH,SIG_DSS,ENC_CAMELLIA128,16,128,128,DIG_SHA256,32,0},
++     {188,KEX_DH,SIG_RSA,ENC_CAMELLIA128,16,128,128,DIG_SHA256,32,0},
++     {189,KEX_DH,SIG_DSS,ENC_CAMELLIA128,16,128,128,DIG_SHA256,32,0},
++     {190,KEX_DH,SIG_RSA,ENC_CAMELLIA128,16,128,128,DIG_SHA256,32,0},
++     {191,KEX_DH,SIG_NONE,ENC_CAMELLIA128,16,128,128,DIG_SHA256,32,0},
++     {192,KEX_RSA,SIG_RSA,ENC_CAMELLIA256,16,256,256,DIG_SHA256,32,0},
++     {193,KEX_DH,SIG_DSS,ENC_CAMELLIA256,16,256,256,DIG_SHA256,32,0},
++     {194,KEX_DH,SIG_RSA,ENC_CAMELLIA256,16,256,256,DIG_SHA256,32,0},
++     {195,KEX_DH,SIG_DSS,ENC_CAMELLIA256,16,256,256,DIG_SHA256,32,0},
++     {196,KEX_DH,SIG_RSA,ENC_CAMELLIA256,16,256,256,DIG_SHA256,32,0},
++     {197,KEX_DH,SIG_NONE,ENC_CAMELLIA256,16,256,256,DIG_SHA256,32,0},
++     {49153,KEX_DH,SIG_DSS,ENC_NULL,0,0,0,DIG_SHA,20,0},
++     {49154,KEX_DH,SIG_DSS,ENC_RC4,1,128,128,DIG_SHA,20,0},
++     {49155,KEX_DH,SIG_DSS,ENC_3DES,8,192,192,DIG_SHA,20,0},
++     {49156,KEX_DH,SIG_DSS,ENC_AES128,16,128,128,DIG_SHA,20,0},
++     {49157,KEX_DH,SIG_DSS,ENC_AES256,16,256,256,DIG_SHA,20,0},
++     {49158,KEX_DH,SIG_DSS,ENC_NULL,0,0,0,DIG_SHA,20,0},
++     {49159,KEX_DH,SIG_DSS,ENC_RC4,1,128,128,DIG_SHA,20,0},
++     {49160,KEX_DH,SIG_DSS,ENC_3DES,8,192,192,DIG_SHA,20,0},
++     {49161,KEX_DH,SIG_DSS,ENC_AES128,16,128,128,DIG_SHA,20,0},
++     {49162,KEX_DH,SIG_DSS,ENC_AES256,16,256,256,DIG_SHA,20,0},
++     {49163,KEX_DH,SIG_RSA,ENC_NULL,0,0,0,DIG_SHA,20,0},
++     {49164,KEX_DH,SIG_RSA,ENC_RC4,1,128,128,DIG_SHA,20,0},
++     {49165,KEX_DH,SIG_RSA,ENC_3DES,8,192,192,DIG_SHA,20,0},
++     {49166,KEX_DH,SIG_RSA,ENC_AES128,16,128,128,DIG_SHA,20,0},
++     {49167,KEX_DH,SIG_RSA,ENC_AES256,16,256,256,DIG_SHA,20,0},
++     {49168,KEX_DH,SIG_RSA,ENC_NULL,0,0,0,DIG_SHA,20,0},
++     {49169,KEX_DH,SIG_RSA,ENC_RC4,1,128,128,DIG_SHA,20,0},
++     {49170,KEX_DH,SIG_RSA,ENC_3DES,8,192,192,DIG_SHA,20,0},
++     {49171,KEX_DH,SIG_RSA,ENC_AES128,16,128,128,DIG_SHA,20,0},
++     {49172,KEX_DH,SIG_RSA,ENC_AES256,16,256,256,DIG_SHA,20,0},
++     {49173,KEX_DH,SIG_NONE,ENC_NULL,0,0,0,DIG_SHA,20,0},
++     {49174,KEX_DH,SIG_NONE,ENC_RC4,1,128,128,DIG_SHA,20,0},
++     {49175,KEX_DH,SIG_NONE,ENC_3DES,8,192,192,DIG_SHA,20,0},
++     {49176,KEX_DH,SIG_NONE,ENC_AES128,16,128,128,DIG_SHA,20,0},
++     {49177,KEX_DH,SIG_NONE,ENC_AES256,16,256,256,DIG_SHA,20,0},
++     {49187,KEX_DH,SIG_DSS,ENC_AES128,16,128,128,DIG_SHA256,32,0},
++     {49188,KEX_DH,SIG_DSS,ENC_AES256,16,256,256,DIG_SHA384,48,0},
++     {49189,KEX_DH,SIG_DSS,ENC_AES128,16,128,128,DIG_SHA256,32,0},
++     {49190,KEX_DH,SIG_DSS,ENC_AES256,16,256,256,DIG_SHA384,48,0},
++     {49191,KEX_DH,SIG_RSA,ENC_AES128,16,128,128,DIG_SHA256,32,0},
++     {49192,KEX_DH,SIG_RSA,ENC_AES256,16,256,256,DIG_SHA384,48,0},
++     {49193,KEX_DH,SIG_RSA,ENC_AES128,16,128,128,DIG_SHA256,32,0},
++     {49194,KEX_DH,SIG_RSA,ENC_AES256,16,256,256,DIG_SHA384,48,0},
++     {49195,KEX_DH,SIG_DSS,ENC_AES128_GCM,4,128,128,DIG_SHA256,32,0},
++     {49196,KEX_DH,SIG_DSS,ENC_AES256_GCM,4,256,256,DIG_SHA384,48,0},
++     {49197,KEX_DH,SIG_DSS,ENC_AES128_GCM,4,128,128,DIG_SHA256,32,0},
++     {49198,KEX_DH,SIG_DSS,ENC_AES256_GCM,4,256,256,DIG_SHA384,48,0},
++     {49199,KEX_DH,SIG_RSA,ENC_AES128_GCM,4,128,128,DIG_SHA256,32,0},
++     {49200,KEX_DH,SIG_RSA,ENC_AES256_GCM,4,256,256,DIG_SHA384,48,0},
++     {49201,KEX_DH,SIG_RSA,ENC_AES128_GCM,4,128,128,DIG_SHA256,32,0},
++     {49202,KEX_DH,SIG_RSA,ENC_AES256_GCM,4,256,256,DIG_SHA384,48,0},
++     // Missing: 49203-49211
++     {49266,KEX_DH,SIG_DSS,ENC_CAMELLIA128,16,128,128,DIG_SHA256,32,0},
++     {49267,KEX_DH,SIG_DSS,ENC_CAMELLIA256,16,256,256,DIG_SHA256,48,0},
++     {49268,KEX_DH,SIG_DSS,ENC_CAMELLIA128,16,128,128,DIG_SHA256,32,0},
++     {49269,KEX_DH,SIG_DSS,ENC_CAMELLIA256,16,256,256,DIG_SHA256,48,0},
++     {49270,KEX_DH,SIG_RSA,ENC_CAMELLIA128,16,128,128,DIG_SHA256,32,0},
++     {49271,KEX_DH,SIG_RSA,ENC_CAMELLIA256,16,256,256,DIG_SHA256,48,0},
++     {49272,KEX_DH,SIG_RSA,ENC_CAMELLIA128,16,128,128,DIG_SHA256,32,0},
++     {49273,KEX_DH,SIG_RSA,ENC_CAMELLIA256,16,256,256,DIG_SHA256,48,0},
++     {49274,KEX_RSA,SIG_RSA,ENC_CAMELLIA128,4,128,128,DIG_SHA256,32,0},
++     {49275,KEX_RSA,SIG_RSA,ENC_CAMELLIA256,4,256,256,DIG_SHA384,48,0},
++     {49276,KEX_DH,SIG_RSA,ENC_CAMELLIA128,4,128,128,DIG_SHA256,32,0},
++     {49277,KEX_DH,SIG_RSA,ENC_CAMELLIA256,4,256,256,DIG_SHA384,48,0},
++     {49278,KEX_DH,SIG_RSA,ENC_CAMELLIA128,4,128,128,DIG_SHA256,32,0},
++     {49279,KEX_DH,SIG_RSA,ENC_CAMELLIA256,4,256,256,DIG_SHA384,48,0},
++     {49280,KEX_DH,SIG_DSS,ENC_CAMELLIA128,4,128,128,DIG_SHA256,32,0},
++     {49281,KEX_DH,SIG_DSS,ENC_CAMELLIA256,4,256,256,DIG_SHA384,48,0},
++     {49282,KEX_DH,SIG_DSS,ENC_CAMELLIA128,4,128,128,DIG_SHA256,32,0},
++     {49283,KEX_DH,SIG_DSS,ENC_CAMELLIA256,4,256,256,DIG_SHA384,48,0},
++     {49284,KEX_DH,SIG_NONE,ENC_CAMELLIA128,4,128,128,DIG_SHA256,32,0},
++     {49285,KEX_DH,SIG_NONE,ENC_CAMELLIA256,4,256,256,DIG_SHA384,48,0},
++     {49286,KEX_DH,SIG_DSS,ENC_CAMELLIA128,4,128,128,DIG_SHA256,32,0},
++     {49287,KEX_DH,SIG_DSS,ENC_CAMELLIA256,4,256,256,DIG_SHA384,48,0},
++     {49288,KEX_DH,SIG_DSS,ENC_CAMELLIA128,4,128,128,DIG_SHA256,32,0},
++     {49289,KEX_DH,SIG_DSS,ENC_CAMELLIA256,4,256,256,DIG_SHA384,48,0},
++     {49290,KEX_DH,SIG_RSA,ENC_CAMELLIA128,4,128,128,DIG_SHA256,32,0},
++     {49291,KEX_DH,SIG_RSA,ENC_CAMELLIA256,4,256,256,DIG_SHA384,48,0},
++     {49292,KEX_DH,SIG_RSA,ENC_CAMELLIA128,4,128,128,DIG_SHA256,32,0},
++     {49293,KEX_DH,SIG_RSA,ENC_CAMELLIA256,4,256,256,DIG_SHA384,48,0},
++     {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
++     // Missing: 49294-49307
++};
++#endif
++
+ SCEnumCharMap tls_decoder_event_table[ ] = {
+     /* TLS protocol messages */
+     { "INVALID_SSLV2_HEADER",        TLS_DECODER_EVENT_INVALID_SSLV2_HEADER },
+@@ -135,6 +316,9 @@ SslConfig ssl_config;
+ #define SSL_PACKET_MAX_RECORDS        255
+ 
+ #define HAS_SPACE(n) ((uint32_t)((input) + (n) - (initial_input)) > (uint32_t)(input_len)) ?  0 : 1
++#ifdef HAVE_TLS_DECODE
++SSL *ssl_conn; 
++#endif
+ 
+ static void SSLParserReset(SSLState *ssl_state)
+ {
+@@ -245,6 +429,773 @@ int SSLGetAlstateProgress(void *tx, uint8_t direction)
+     return TLS_STATE_IN_PROGRESS;
+ }
+ 
++
++#ifdef HAVE_TLS_DECODE
++static int r_data_destroy(Data **dp)
++{
++    if(!dp || !*dp)
++        return(0);
++
++    if((*dp)->data)
++        free((*dp)->data);
++
++    free(*dp);
++    *dp=0;
++
++    return(0);
++}
++
++static int r_data_create(Data **dp,UCHAR *d,int l)
++{
++    Data *d_=0;
++    int _status;
++
++    if(!(d_=(Data *)calloc(sizeof(Data),1)))
++        ABORT(R_NO_MEMORY);
++    if(!(d_->data=(UCHAR *)malloc(l)))
++        ABORT(R_NO_MEMORY);
++
++    memcpy(d_->data,d,l);
++    d_->len=l;
++
++    *dp=d_;
++
++    _status=0;
++    abort:
++    if(_status)
++        r_data_destroy(&d_);
++
++    return(_status);
++}
++
++
++static int r_data_alloc(Data **dp,int l)
++{
++    Data *d_=0;
++    int _status;
++
++    if(!(d_=(Data *)calloc(sizeof(Data),1)))
++        ABORT(R_NO_MEMORY);
++    if(!(d_->data=(UCHAR *)calloc(l,1)))
++        ABORT(R_NO_MEMORY);
++
++    d_->len=l;
++
++    *dp=d_;
++    _status=0;
++    abort:
++    if(_status)
++        r_data_destroy(&d_);
++
++    return(_status);
++}
++
++static int TLSDecodeHandshakeClientHello(SSLState *ssl_state, uint8_t *input,
++                                   uint32_t input_len)
++{
++    uint8_t *initial_input = input;
++
++    /* only parse the message if it is complete */
++    if (input_len < ssl_state->curr_connp->message_length || input_len < 40)
++        return 0;
++
++    /* skip version */
++    input += SSLV3_CLIENT_HELLO_VERSION_LEN;
++
++	if(ssl_state->current_flags == SSL_AL_FLAG_STATE_CLIENT_HELLO){
++        r_data_create(&ssl_state->client_random,input,SSLV3_CLIENT_HELLO_RANDOM_LEN);
++    }
++	
++    /* skip random */
++    input += SSLV3_CLIENT_HELLO_RANDOM_LEN;
++
++    if (!(HAS_SPACE(1)))
++        goto invalid_length;
++
++    /* skip session id */
++    uint8_t session_id_length = *(input++);
++
++    input += session_id_length;
++
++    if (!(HAS_SPACE(2)))
++        goto invalid_length;
++
++    /* skip cipher suites */
++    uint16_t cipher_suites_length = input[0] << 8 | input[1];
++    input += 2;
++
++    input += cipher_suites_length;
++
++    if (!(HAS_SPACE(1)))
++        goto invalid_length;
++
++    /* skip compression methods */
++    uint8_t compression_methods_length = *(input++);
++
++    input += compression_methods_length;
++
++    /* extensions are optional (RFC5246 section 7.4.1.2) */
++    if (!(HAS_SPACE(2)))
++        goto end;
++
++    uint16_t extensions_len = input[0] << 8 | input[1];
++    input += 2;
++
++    if (!(HAS_SPACE(extensions_len)))
++        goto invalid_length;
++
++    uint16_t processed_len = 0;
++    while (processed_len < extensions_len)
++    {
++        if (!(HAS_SPACE(2)))
++            goto invalid_length;
++
++        uint16_t ext_type = input[0] << 8 | input[1];
++        input += 2;
++
++        if (!(HAS_SPACE(2)))
++            goto invalid_length;
++
++        uint16_t ext_len = input[0] << 8 | input[1];
++        input += 2;
++
++        switch (ext_type) {
++            case SSL_EXTENSION_SNI:
++            {
++                /* there must not be more than one extension of the same
++                   type (RFC5246 section 7.4.1.4) */
++                if (ssl_state->curr_connp->sni) {
++                    SCLogDebug("Multiple SNI extensions");
++                    SSLSetEvent(ssl_state,
++                            TLS_DECODER_EVENT_MULTIPLE_SNI_EXTENSIONS);
++                    return -1;
++                }
++
++                /* skip sni_list_length */
++                input += 2;
++
++                if (!(HAS_SPACE(1)))
++                    goto invalid_length;
++
++                uint8_t sni_type = *(input++);
++
++                /* currently the only type allowed is host_name
++                   (RFC6066 section 3) */
++                if (sni_type != SSL_SNI_TYPE_HOST_NAME) {
++                    SCLogDebug("Unknown SNI type");
++                    SSLSetEvent(ssl_state,
++                            TLS_DECODER_EVENT_INVALID_SNI_TYPE);
++                    return -1;
++                }
++
++                if (!(HAS_SPACE(2)))
++                    goto invalid_length;
++
++                uint16_t sni_len = input[0] << 8 | input[1];
++                input += 2;
++
++                if (!(HAS_SPACE(sni_len)))
++                    goto invalid_length;
++
++                /* host_name contains the fully qualified domain name,
++                   and should therefore be limited by the maximum domain
++                   name length */
++                if (sni_len > 255) {
++                    SCLogDebug("SNI length >255");
++                    SSLSetEvent(ssl_state,
++                            TLS_DECODER_EVENT_INVALID_SNI_LENGTH);
++                    return -1;
++                }
++
++                size_t sni_strlen = sni_len + 1;
++                ssl_state->curr_connp->sni = SCMalloc(sni_strlen);
++
++                if (unlikely(ssl_state->curr_connp->sni == NULL))
++                    goto end;
++
++                memcpy(ssl_state->curr_connp->sni, input, sni_strlen - 1);
++                ssl_state->curr_connp->sni[sni_strlen-1] = 0;
++
++                input += sni_len;
++                break;
++            }
++            default:
++            {
++                input += ext_len;
++                break;
++            }
++        }
++        processed_len += ext_len + 4;
++    }
++
++end:
++    return 0;
++
++invalid_length:
++    SCLogDebug("TLS handshake invalid length");
++    SSLSetEvent(ssl_state,
++            TLS_DECODER_EVENT_HANDSHAKE_INVALID_LENGTH);
++    return 0;
++}
++
++static int ssl_find_cipher(int num,SSL_CipherSuite **cs)
++{
++   SSL_CipherSuite *c;
++
++   for(c=CipherSuites;c->number!=-1;c++){
++     if(c->number==num){
++	*cs=c;
++	return(0);
++     }
++   }
++
++   ERETURN(R_NOT_FOUND);
++}
++
++static int TLSDecodeHandshakeServerHello(SSLState *ssl_state, uint8_t *input,
++                                   uint32_t input_len)
++{
++    uint8_t *initial_input = input;
++    uint16_t version;
++    /* only parse the message if it is complete */
++    if (input_len < ssl_state->curr_connp->message_length || input_len < 40)
++        return 0;
++    version = input[0] << 8| input[1];
++    ssl_state->curr_connp->version = version;
++    /* skip version */
++    input += SSLV3_CLIENT_HELLO_VERSION_LEN;
++
++	if(ssl_state->current_flags == SSL_AL_FLAG_STATE_SERVER_HELLO){
++        r_data_create(&ssl_state->server_random,input,SSLV3_CLIENT_HELLO_RANDOM_LEN);
++    }
++	
++    /* skip random */
++    input += SSLV3_CLIENT_HELLO_RANDOM_LEN;
++
++    if (!(HAS_SPACE(1)))
++        goto invalid_length;
++
++    /* skip session id */
++    uint8_t session_id_length = *(input++);
++    if (session_id_length != 0) {
++        ssl_state->flags |= SSL_AL_FLAG_SSL_CLIENT_SESSION_ID;
++    }
++
++    input += session_id_length;
++
++    if (!(HAS_SPACE(2)))
++        goto invalid_length;
++
++    /* skip cipher suites */
++    ssl_state->cipher_suit = input[0] << 8 | input[1];
++    input += 2;
++	ssl_find_cipher(ssl_state->cipher_suit,&ssl_state->cs);
++
++    /* skip compression method */
++    input += 1;
++    /* skip externsions */
++    input += input[0] << 8 | input[1];
++
++    return 0;
++
++invalid_length:
++    SCLogDebug("TLS handshake invalid length");
++    SSLSetEvent(ssl_state,
++            TLS_DECODER_EVENT_HANDSHAKE_INVALID_LENGTH);
++    return 0;
++}
++#define SSLV3_VERSION          0x300
++#define TLSV1_VERSION          0x301
++#define TLSV11_VERSION         0x302
++#define TLSV12_VERSION         0x303
++static const char *digests[]={
++     "MD5",
++     "SHA1",
++     "SHA224",
++     "SHA256",
++     "SHA384",
++     "SHA512",
++     NULL
++};
++static const char *ciphers[]={
++     "DES",
++     "3DES",
++     "RC4",
++     "RC2",
++     "IDEA",
++     "AES128",
++     "AES256",
++     "CAMELLIA128",
++     "CAMELLIA256",
++     "SEED",
++     NULL,
++     "aes-128-gcm",
++     "aes-256-gcm"
++};
++
++static int ssl3_prf(Data *secret,const char *usage,Data *r1,Data *r2,Data *out)
++{
++  MD5_CTX md5;
++  SHA_CTX sha;
++  Data *rnd1,*rnd2;
++  unsigned int off;
++  int i=0,j;
++  UCHAR buf[20];
++
++  rnd1=r1; rnd2=r2;
++  MD5_Init(&md5);
++  memset(&sha,0,sizeof(sha));
++  SHA1_Init(&sha);
++
++  for(off=0;off<out->len;off+=16){
++    unsigned char outbuf[16];
++    int tocpy;
++    i++;
++    
++    /* A, BB, CCC,  ... */
++    for(j=0;j<i;j++){
++      buf[j]=64+i;
++    }
++    
++    SHA1_Update(&sha,buf,i);
++    if(secret) SHA1_Update(&sha,secret->data,secret->len);
++
++    if(!strcmp(usage,"client write key") || !strcmp(usage,"server write key")){
++      SHA1_Update(&sha,rnd2->data,rnd2->len);
++      SHA1_Update(&sha,rnd1->data,rnd1->len);
++    }
++    else{
++      SHA1_Update(&sha,rnd1->data,rnd1->len);
++      SHA1_Update(&sha,rnd2->data,rnd2->len);
++    }
++    
++    SHA1_Final(buf,&sha);
++    
++    SHA1_Init(&sha);
++    
++    MD5_Update(&md5,secret->data,secret->len);
++    MD5_Update(&md5,buf,20);
++    MD5_Final(outbuf,&md5);
++    tocpy=MIN(out->len-off,16);
++    memcpy(out->data+off,outbuf,tocpy);
++    
++    MD5_Init(&md5);
++  }
++
++  return(0);
++}
++
++static int tls_P_hash(Data *secret,Data *seed,const EVP_MD *md,Data *out)
++{
++  UCHAR *ptr=out->data;
++  uint32_t left=out->len;
++  int tocpy;
++  UCHAR *A;
++  UCHAR _A[128],tmp[128];
++  unsigned int A_l,tmp_l;
++  HMAC_CTX hm;
++
++  A=seed->data;
++  A_l=seed->len;
++
++  while(left){
++    HMAC_Init(&hm,secret->data,secret->len,md);
++    HMAC_Update(&hm,A,A_l);
++    HMAC_Final(&hm,_A,&A_l);
++    HMAC_cleanup(&hm);
++    A=_A;
++
++    HMAC_Init(&hm,secret->data,secret->len,md);
++    HMAC_Update(&hm,A,A_l);
++    HMAC_Update(&hm,seed->data,seed->len);
++    HMAC_Final(&hm,tmp,&tmp_l);
++    HMAC_cleanup(&hm);
++
++    tocpy=MIN(left,tmp_l);
++    memcpy(ptr,tmp,tocpy);
++    ptr+=tocpy;
++    left-=tocpy;
++  }  
++  return (0);
++}    
++
++
++static int tls12_prf(SSLState *ssl ,Data *secret,const char *usage,Data *rnd1,Data *rnd2,Data *out)
++{
++  const EVP_MD *md;
++  int r,_status;
++  Data *sha_out=0;
++  Data *seed;
++  UCHAR *ptr;
++  uint32_t i, dgi;
++
++  if((r=r_data_alloc(&sha_out,MAX(out->len,64)))) /* assume max SHA512 */
++    ABORT(r);
++  if((r=r_data_alloc(&seed,strlen(usage)+rnd1->len+rnd2->len)))
++    ABORT(r);
++  ptr=seed->data;
++  memcpy(ptr,usage,strlen(usage)); ptr+=strlen(usage);
++  memcpy(ptr,rnd1->data,rnd1->len); ptr+=rnd1->len;
++  memcpy(ptr,rnd2->data,rnd2->len); ptr+=rnd2->len;    
++
++  /* Earlier versions of openssl didn't have SHA256 of course... */
++  dgi = MAX(DIG_SHA256, ssl->cs->dig);
++  dgi-=0x40;
++  if ((md=EVP_get_digestbyname(digests[dgi])) == NULL) {
++      DBG((0,"Cannot get EVP for digest %s, openssl library current?",
++                  digests[dgi]));
++      ERETURN(SSL_BAD_MAC);
++  }
++  if((r=tls_P_hash(secret,seed,md,sha_out)))
++    ABORT(r);
++
++  for(i=0;i<out->len;i++)
++    out->data[i]=sha_out->data[i];
++
++  _status=0;
++abort:
++  r_data_destroy(&sha_out);
++  r_data_destroy(&seed);
++  return(_status);
++
++}
++
++static int tls_prf(Data *secret,const char *usage,Data *rnd1,Data *rnd2,Data *out)
++{
++  int r,_status;
++  Data *md5_out=0,*sha_out=0;
++  Data *seed;
++  UCHAR *ptr;
++  Data *S1=0,*S2=0;
++  uint32_t i,S_l;
++
++  if((r=r_data_alloc(&md5_out,MAX(out->len,16))))
++    ABORT(r);
++  if((r=r_data_alloc(&sha_out,MAX(out->len,20))))
++    ABORT(r);
++  if((r=r_data_alloc(&seed,strlen(usage)+rnd1->len+rnd2->len)))
++    ABORT(r);
++  ptr=seed->data;
++  memcpy(ptr,usage,strlen(usage)); ptr+=strlen(usage);
++  memcpy(ptr,rnd1->data,rnd1->len); ptr+=rnd1->len;
++  memcpy(ptr,rnd2->data,rnd2->len); ptr+=rnd2->len;    
++
++  S_l=secret->len/2 + secret->len%2;
++  
++  if((r=r_data_alloc(&S1,S_l)))
++    ABORT(r);
++  if((r=r_data_alloc(&S2,S_l)))
++    ABORT(r);
++  
++  memcpy(S1->data,secret->data,S_l);
++  memcpy(S2->data,secret->data + (secret->len - S_l),S_l);
++  
++  if((r=tls_P_hash(S1,seed,EVP_get_digestbyname("MD5"),md5_out)))
++    ABORT(r);
++  if((r=tls_P_hash(S2,seed,EVP_get_digestbyname("SHA1"),sha_out)))
++    ABORT(r);
++
++
++  for(i=0;i<out->len;i++)
++    out->data[i]=md5_out->data[i] ^ sha_out->data[i];
++
++  _status=0;
++abort:
++  r_data_destroy(&md5_out);
++  r_data_destroy(&sha_out);
++  r_data_destroy(&seed);
++  r_data_destroy(&S1);
++  r_data_destroy(&S2);
++  return(_status);
++
++}
++
++#define PRF(ssl,secret,usage,rnd1,rnd2,out) (ssl->curr_connp->version==SSLV3_VERSION)? \
++        ssl3_prf(secret,usage,rnd1,rnd2,out): \
++        ((ssl->curr_connp->version == TLSV12_VERSION) ? \
++            tls12_prf(ssl,secret,usage,rnd1,rnd2,out): \
++            tls_prf(secret,usage,rnd1,rnd2,out))
++
++static int ssl_destroy_rec_decoder(ssl_rec_decoder **dp)
++{
++    ssl_rec_decoder *d;
++    
++    if(!dp || !*dp)
++      return(0);
++    d=*dp;
++
++    r_data_destroy(&d->mac_key);
++    r_data_destroy(&d->implicit_iv);
++    r_data_destroy(&d->write_key);
++#ifdef OPENSSL    
++    if(d->evp){
++      EVP_CIPHER_CTX_cleanup(d->evp);
++      free(d->evp);
++    }
++    free(*dp);
++#endif    
++
++    *dp=0;
++    return(0);
++  }
++
++
++static int ssl_create_rec_decoder(ssl_rec_decoder **dp,SSL_CipherSuite *cs,UCHAR *mk,UCHAR *sk,UCHAR *iv)
++{
++    int r,_status;
++    ssl_rec_decoder *dec=0;
++    const EVP_CIPHER *ciph=0;
++
++    /* Find the SSLeay cipher */
++    if(cs->enc!=ENC_NULL){
++      ciph=(EVP_CIPHER *)EVP_get_cipherbyname(ciphers[cs->enc-0x30]);
++      if(!ciph)
++        ABORT(R_INTERNAL);
++    }
++    else {
++      ciph=EVP_enc_null();
++    }
++
++    if(!(dec=(ssl_rec_decoder *)calloc(1,sizeof(ssl_rec_decoder))))
++      ABORT(R_NO_MEMORY);
++
++    dec->cs=cs;
++
++    if((r=r_data_alloc(&dec->mac_key,cs->dig_len)))
++      ABORT(r);
++
++    if((r=r_data_alloc(&dec->implicit_iv,cs->block)))
++      ABORT(r);
++    memcpy(dec->implicit_iv->data,iv,cs->block);
++
++    if((r=r_data_create(&dec->write_key,sk,cs->eff_bits/8)))
++      ABORT(r);
++
++    /*
++       This is necessary for AEAD ciphers, because we must wait to fully initialize the cipher
++       in order to include the implicit IV
++    */
++    if(IS_AEAD_CIPHER(cs)){
++      sk=NULL;
++      iv=NULL;
++    }
++    else
++      memcpy(dec->mac_key->data,mk,cs->dig_len);
++
++    if(!(dec->evp=(EVP_CIPHER_CTX *)malloc(sizeof(EVP_CIPHER_CTX))))
++      ABORT(R_NO_MEMORY);
++    EVP_CIPHER_CTX_init(dec->evp);
++    EVP_CipherInit(dec->evp,ciph,sk,iv,0);    
++    *dp=dec;
++    _status=0;
++  abort:
++    if(_status){
++      ssl_destroy_rec_decoder(&dec);
++    }
++    return(_status);
++}
++
++static int ssl3_generate_export_iv(Data *r1,Data *r2,Data *out)
++{
++  MD5_CTX md5;
++  UCHAR tmp[16];
++  
++  MD5_Init(&md5);
++  MD5_Update(&md5,r1->data,r1->len);
++  MD5_Update(&md5,r2->data,r2->len);
++  MD5_Final(tmp,&md5);
++
++  memcpy(out->data,tmp,out->len);
++
++  return(0);
++}
++
++static int r_data_zfree(Data *d)
++{
++    if(!d)
++        return(0);
++    if(!d->data)
++        return(0);
++    memset(d->data,0,d->len);
++    free(d->data);
++
++    return(0);
++}
++
++
++static int TLSDecodeHandshakeKeyExchange(SSLState *ssl_state, uint8_t *input,
++                                   uint32_t input_len)
++{
++    uint8_t *initial_input = input;
++    uint16_t exchange_len;
++    uint8_t msg[2048];
++    Data *out;
++    int needed;
++	Data *key_block = 0;
++    EVP_PKEY *pk;
++    UCHAR _iv_c[8],_iv_s[8];
++    UCHAR _key_c[16],_key_s[16];
++	UCHAR *ptr,*c_wk,*s_wk,*c_mk=NULL,*s_mk=NULL,*c_iv=NULL,*s_iv=NULL;
++	struct SSL_CipherSuite_ *cs;
++    int r,_status;
++    (void)_status;
++    /* only parse the message if it is complete */
++    if (input_len < ssl_state->curr_connp->message_length || input_len < 40)
++        return 0;
++
++    exchange_len = input[0] << 8 | input[1];
++    input += 2;
++    memcpy(msg, input, exchange_len);
++    /* Decode pre masterkey */
++
++    pk=SSL_get_privatekey(ssl_conn);	
++    r_data_alloc(&out,48);
++    RSA_private_decrypt(exchange_len ,msg,out->data,
++        pk->pkey.rsa,RSA_PKCS1_PADDING);
++    if(!ssl_state->master_key){
++      r_data_alloc(&ssl_state->master_key,48);
++	  PRF(ssl_state,out,"master secret",
++              ssl_state->client_random,
++              ssl_state->server_random,ssl_state->master_key);
++    }
++    cs = ssl_state->cs;
++    needed=!IS_AEAD_CIPHER(cs)?cs->dig_len*2:0;
++    needed+=cs->bits / 4;
++	if(cs->block>1) needed+=cs->block*2;
++	r_data_alloc(&key_block,needed);
++	PRF(ssl_state,ssl_state->master_key,"key expansion",
++            ssl_state->server_random,
++            ssl_state->client_random,key_block);
++	ptr=key_block->data;
++	if(!IS_AEAD_CIPHER(cs)){
++      c_mk=ptr; ptr+=cs->dig_len;
++      s_mk=ptr; ptr+=cs->dig_len;
++    }
++    c_wk=ptr; ptr+=cs->eff_bits/8;
++    s_wk=ptr; ptr+=cs->eff_bits/8;
++    if(cs->block>1){
++      c_iv=ptr; ptr+=cs->block;
++      s_iv=ptr; ptr+=cs->block;
++    }
++    if(cs->export){
++      Data iv_c,iv_s;
++      Data key_c,key_s;
++      Data k;
++
++      if(cs->block>1){
++        ATTACH_DATA(iv_c,_iv_c);
++        ATTACH_DATA(iv_s,_iv_s);
++        
++        if(ssl_state->curr_connp->version==SSLV3_VERSION){
++          if((r=ssl3_generate_export_iv(ssl_state->client_random,
++            ssl_state->server_random,&iv_c)))
++            ABORT(r);
++          if((r=ssl3_generate_export_iv(ssl_state->server_random,
++            ssl_state->client_random,&iv_s)))
++            ABORT(r);
++        }
++        else{
++          UCHAR _iv_block[16];
++          Data iv_block;
++          Data key_null;
++          UCHAR _key_null;
++
++          INIT_DATA(key_null,&_key_null,0);
++
++          /* We only have room for 8 bit IVs, but that's
++             all we should need. This is a sanity check */
++          if(cs->block>8)
++            ABORT(R_INTERNAL);
++          
++          ATTACH_DATA(iv_block,_iv_block);
++
++          if((r=PRF(ssl_state,&key_null,"IV block",
++                      ssl_state->client_random,
++                      ssl_state->server_random,&iv_block)))
++            ABORT(r);
++
++          memcpy(_iv_c,iv_block.data,8);
++          memcpy(_iv_s,iv_block.data+8,8);
++        }
++
++        c_iv=_iv_c;
++        s_iv=_iv_s;
++      }
++      
++      if(ssl_state->curr_connp->version==SSLV3_VERSION){
++        MD5_CTX md5;
++
++        MD5_Init(&md5);
++        MD5_Update(&md5,c_wk,cs->eff_bits/8);
++        MD5_Update(&md5,ssl_state->client_random,32);
++        MD5_Update(&md5,ssl_state->server_random,32);        
++        MD5_Final(_key_c,&md5);
++        c_wk=_key_c;
++
++        MD5_Init(&md5);
++        MD5_Update(&md5,s_wk,cs->eff_bits/8);
++        MD5_Update(&md5,ssl_state->server_random,32);
++        MD5_Update(&md5,ssl_state->client_random,32);
++        MD5_Final(_key_s,&md5);
++        s_wk=_key_s;
++      }
++      else{
++        ATTACH_DATA(key_c,_key_c);
++        ATTACH_DATA(key_s,_key_s);
++        INIT_DATA(k,c_wk,cs->eff_bits/8);
++        if((r=PRF(ssl_state,&k,"client write key",
++                    ssl_state->client_random,
++                    ssl_state->server_random, &key_c)))
++          ABORT(r);
++        c_wk=_key_c;
++        INIT_DATA(k,s_wk,cs->eff_bits/8);
++        if((r=PRF(ssl_state,&k,"server write key",
++                    ssl_state->client_random,
++                    ssl_state->server_random, &key_s)))
++          ABORT(r);
++        s_wk=_key_s;
++      }
++    }
++
++    if((r=ssl_create_rec_decoder(&ssl_state->c_to_s_n,
++      cs,c_mk,c_wk,c_iv)))
++      ABORT(r);
++    if((r=ssl_create_rec_decoder(&ssl_state->s_to_c_n,
++      cs,s_mk,s_wk,s_iv)))
++      ABORT(r);
++  abort:
++    if(key_block){
++      r_data_zfree(key_block);
++      free(key_block);
++    }
++
++    /* skip pre_master */
++    input += exchange_len ;
++
++    if (!(HAS_SPACE(1)))
++        goto invalid_length;
++    /* skip change cipher spec */
++    input += 3;
++    input += input[0] << 8| input[1];
++    input += 2;
++    if (!(HAS_SPACE(1)))
++        goto invalid_length;
++#if 0
++    /* skip finish */
++    input += 3;
++    input += input[0] << 8| input[1];
++    input += 2;
++#endif
++    return 0;
++
++invalid_length:
++    SCLogDebug("TLS handshake invalid length");
++    SSLSetEvent(ssl_state,
++            TLS_DECODER_EVENT_HANDSHAKE_INVALID_LENGTH);
++    return 0;
++}
++#else
++
+ static int TLSDecodeHandshakeHello(SSLState *ssl_state, uint8_t *input,
+                                    uint32_t input_len)
+ {
+@@ -388,9 +1339,10 @@ invalid_length:
+             TLS_DECODER_EVENT_HANDSHAKE_INVALID_LENGTH);
+     return 0;
+ }
++#endif
+ 
+ static int SSLv3ParseHandshakeType(SSLState *ssl_state, uint8_t *input,
+-                                   uint32_t input_len)
++                                   uint32_t input_len, uint8_t direction)
+ {
+     void *ptmp;
+     uint8_t *initial_input = input;
+@@ -405,7 +1357,11 @@ static int SSLv3ParseHandshakeType(SSLState *ssl_state, uint8_t *input,
+         case SSLV3_HS_CLIENT_HELLO:
+             ssl_state->current_flags = SSL_AL_FLAG_STATE_CLIENT_HELLO;
+ 
++#ifdef HAVE_TLS_DECODE
++            rc = TLSDecodeHandshakeClientHello(ssl_state, input, input_len);
++#else
+             rc = TLSDecodeHandshakeHello(ssl_state, input, input_len);
++#endif
+ 
+             if (rc < 0)
+                 return rc;
+@@ -414,6 +1370,13 @@ static int SSLv3ParseHandshakeType(SSLState *ssl_state, uint8_t *input,
+ 
+         case SSLV3_HS_SERVER_HELLO:
+             ssl_state->current_flags = SSL_AL_FLAG_STATE_SERVER_HELLO;
++#ifdef HAVE_TLS_DECODE
++            rc = TLSDecodeHandshakeServerHello(ssl_state, input, input_len);
++
++            if (rc < 0)
++                return rc;
++#endif
++
+             break;
+ 
+         case SSLV3_HS_SERVER_KEY_EXCHANGE:
+@@ -422,6 +1385,11 @@ static int SSLv3ParseHandshakeType(SSLState *ssl_state, uint8_t *input,
+ 
+         case SSLV3_HS_CLIENT_KEY_EXCHANGE:
+             ssl_state->current_flags = SSL_AL_FLAG_STATE_CLIENT_KEYX;
++#ifdef HAVE_TLS_DECODE
++            rc = TLSDecodeHandshakeKeyExchange(ssl_state, input, input_len);
++            if (rc < 0)
++                return rc;
++#endif
+             break;
+ 
+         case SSLV3_HS_CERTIFICATE:
+@@ -568,7 +1536,7 @@ static int SSLv3ParseHandshakeType(SSLState *ssl_state, uint8_t *input,
+ }
+ 
+ static int SSLv3ParseHandshakeProtocol(SSLState *ssl_state, uint8_t *input,
+-                                       uint32_t input_len)
++                                       uint32_t input_len, uint8_t direction)
+ {
+     uint8_t *initial_input = input;
+     int retval;
+@@ -621,7 +1589,7 @@ static int SSLv3ParseHandshakeProtocol(SSLState *ssl_state, uint8_t *input,
+             /* fall through */
+     }
+ 
+-    retval = SSLv3ParseHandshakeType(ssl_state, input, input_len);
++    retval = SSLv3ParseHandshakeType(ssl_state, input, input_len, direction);
+     if (retval < 0) {
+         return retval;
+     }
+@@ -1158,6 +2126,242 @@ static int SSLv2Decode(uint8_t direction, SSLState *ssl_state,
+         return (input - initial_input);
+     }
+ }
++#ifdef HAVE_TLS_DECODE
++#define MSB(a) ((a>>8)&0xff)
++#define LSB(a) (a&0xff)
++
++static int fmt_seq(uint32_t num,uint8_t *buf)
++  {
++    uint32_t netnum;
++    
++    memset(buf,0,8);
++    netnum=htonl(num);
++    memcpy(buf+4,&netnum,4);
++
++    return(0);
++  }
++
++static int ssl3_check_mac(ssl_rec_decoder *d,int ct,int ver,
++        UCHAR *data,uint32_t datalen,UCHAR *mac)
++  {
++    EVP_MD_CTX mc;
++    const EVP_MD *md;
++    uint32_t l;
++    UCHAR buf[64],dgst[20];
++    int pad_ct;
++
++    pad_ct=(d->cs->dig==DIG_SHA)?40:48;
++    
++    md=EVP_get_digestbyname(digests[d->cs->dig-0x40]);
++    EVP_DigestInit(&mc,md);
++
++    EVP_DigestUpdate(&mc,d->mac_key->data,d->mac_key->len);
++
++    memset(buf,0x36,pad_ct);
++    EVP_DigestUpdate(&mc,buf,pad_ct);
++
++    fmt_seq(d->seq,buf);
++    d->seq++;
++    EVP_DigestUpdate(&mc,buf,8);
++
++    buf[0]=ct;
++    EVP_DigestUpdate(&mc,buf,1);
++    
++    buf[0]=MSB(datalen);
++    buf[1]=LSB(datalen);
++    EVP_DigestUpdate(&mc,buf,2);    
++
++    EVP_DigestUpdate(&mc,data,datalen);
++
++    EVP_DigestFinal(&mc,dgst,&l);
++    
++    EVP_DigestInit(&mc,md);
++
++    EVP_DigestUpdate(&mc,d->mac_key->data,d->mac_key->len);
++    
++    memset(buf,0x5c,pad_ct);
++    EVP_DigestUpdate(&mc,buf,pad_ct);
++
++    EVP_DigestUpdate(&mc,dgst,l);
++
++    EVP_DigestFinal(&mc,dgst,&l);
++
++    if(memcmp(mac,dgst,l))
++      ERETURN(SSL_BAD_MAC);
++
++    return(0);
++  }
++ 
++
++static int tls_check_mac(ssl_rec_decoder *d,int ct,int ver,UCHAR *data,
++        uint32_t datalen,UCHAR *iv,uint32_t ivlen,UCHAR *mac)
++  {
++    HMAC_CTX hm;
++    const EVP_MD *md;
++    uint32_t l;
++    UCHAR buf[128];
++    
++    md=EVP_get_digestbyname(digests[d->cs->dig-0x40]);
++    HMAC_Init(&hm,d->mac_key->data,d->mac_key->len,md);
++
++    fmt_seq(d->seq,buf);
++    d->seq++;
++    HMAC_Update(&hm,buf,8);
++    buf[0]=ct;
++    HMAC_Update(&hm,buf,1);
++
++    buf[0]=MSB(ver);
++    buf[1]=LSB(ver);
++    HMAC_Update(&hm,buf,2);
++
++    buf[0]=MSB(datalen);
++    buf[1]=LSB(datalen);
++    HMAC_Update(&hm,buf,2);
++
++    /* for encrypt-then-mac with an explicit IV */
++    if(ivlen && iv){
++      HMAC_Update(&hm,iv,ivlen);
++      HMAC_Update(&hm,data,datalen-ivlen);
++    }
++    else
++      HMAC_Update(&hm,data,datalen);
++    
++    HMAC_Final(&hm,buf,&l);
++    if(memcmp(mac,buf,l))
++      ERETURN(SSL_BAD_MAC);
++
++    HMAC_cleanup(&hm);
++    return(0);
++  }
++
++
++
++static int ssl_decode_rec_data(SSLState *ssl_state,ssl_rec_decoder *d,int ct,
++        int version,UCHAR *in,int inl,UCHAR *out,int *outl)
++{
++    int pad;
++    int r,encpadl,x;
++    UCHAR *mac,aead_tag[13],aead_nonce[12];
++#if 1 
++    if(IS_AEAD_CIPHER(d->cs)){
++      memcpy(aead_nonce,d->implicit_iv->data,d->implicit_iv->len);
++      memcpy(aead_nonce+d->implicit_iv->len,in,12-d->implicit_iv->len);
++      in+=12-d->implicit_iv->len;
++      inl-=12-d->implicit_iv->len;
++
++      EVP_DecryptInit(d->evp,
++		      NULL,
++		      d->write_key->data,
++		      aead_nonce);
++
++      /*
++	 Then tag is always 16 bytes, as per:
++	 https://tools.ietf.org/html/rfc5116#section-5.2
++      */
++      EVP_CIPHER_CTX_ctrl(d->evp,EVP_CTRL_GCM_SET_TAG,16,in+(inl-16));
++      inl-=16;
++
++      fmt_seq(d->seq,aead_tag);
++      d->seq++;
++      aead_tag[8]=ct;
++      aead_tag[9]=MSB(version);
++      aead_tag[10]=LSB(version);
++      aead_tag[11]=MSB(inl);
++      aead_tag[12]=LSB(inl);
++
++      EVP_DecryptUpdate(d->evp,NULL,outl,aead_tag,13);
++      EVP_DecryptUpdate(d->evp,out,outl,in,inl);
++
++      if (!(x=EVP_DecryptFinal(d->evp,NULL,&x)))
++	ERETURN(SSL_BAD_MAC);
++    }
++#if 1
++    /*
++       Encrypt-then-MAC is not used with AEAD ciphers, as per:
++       https://tools.ietf.org/html/rfc7366#section-3
++    */
++    else if(ssl_state->extensions.encrypt_then_mac==2){
++      *outl=inl;
++
++      /* First strip off the MAC */
++      *outl-=d->cs->dig_len;
++      mac=in+(*outl);
++
++      encpadl=*outl;
++      /* Now decrypt */
++      EVP_Cipher(d->evp,out,in,*outl);
++
++      /* And then strip off the padding*/
++      if(d->cs->block>1){
++	pad=out[*outl-1];
++	*outl-=(pad+1);
++      }
++      /* TLS 1.1 and beyond: remove explicit IV, only used with
++       * non-stream ciphers. */
++      if (version>=0x0302 && ssl_state->cs->block > 1) {
++          int blk = ssl_state->cs->block;
++          if (blk <= *outl) {
++	    *outl-=blk;
++	    memmove(out, out+blk, *outl);
++          }
++          else {
++              DBG((0,"Block size greater than Plaintext!"));
++              ERETURN(SSL_BAD_MAC);
++          }
++
++	  if((r=tls_check_mac(d,ct,version,in+blk,encpadl,in,blk,mac)))
++	    ERETURN(r);
++
++      }
++      else
++	if((r=tls_check_mac(d,ct,version,in,encpadl,NULL,0,mac)))
++	  ERETURN(r);
++
++    }
++#endif
++#endif
++   else {
++      /* First decrypt*/
++      EVP_Cipher(d->evp,out,in,inl);
++
++      *outl=inl;
++    
++      /* Now strip off the padding*/
++      if(d->cs->block>1){
++	pad=out[inl-1];
++	*outl-=(pad+1);
++      }
++
++      /* And the MAC */
++      *outl-=d->cs->dig_len;
++      mac=out+(*outl);
++#if 1
++      /* Now check the MAC */
++      if(version==0x300){
++	if((r=ssl3_check_mac(d,ct,version,out,*outl,mac)))
++	  ERETURN(r);
++      }
++      else{
++	/* TLS 1.1 and beyond: remove explicit IV, only used with
++	 * non-stream ciphers. */
++	if (version>=0x0302 && ssl_state->cs->block > 1) {
++          int blk = ssl_state->cs->block;
++          if (blk <= *outl) {
++	    *outl-=blk;
++	    memmove(out, out+blk, *outl);
++          }
++          else {
++	    ERETURN(SSL_BAD_MAC);
++          }
++	}
++	if((r=tls_check_mac(d,ct,version,out,*outl,NULL,0,mac)))
++	  ERETURN(r);
++      }
++#endif
++    }
++    return(0);
++}
++#endif 
+ 
+ static int SSLv3Decode(uint8_t direction, SSLState *ssl_state,
+                        AppLayerParserState *pstate, uint8_t *input,
+@@ -1234,7 +2438,24 @@ static int SSLv3Decode(uint8_t direction, SSLState *ssl_state,
+                 AppLayerParserStateSetFlag(pstate, APP_LAYER_PARSER_NO_REASSEMBLY);
+                 AppLayerParserStateSetFlag(pstate, APP_LAYER_PARSER_NO_INSPECTION);
+             }
+-
++#ifdef HAVE_TLS_DECODE
++            uint8_t *data,out[2048];
++            uint16_t version,data_len,ct;
++            int outl;
++            ssl_rec_decoder *decoder;
++
++            ct = 23;
++            version=ssl_state->curr_connp->version;
++            data = input+5;
++            data_len = input[3]<<8|input[4];
++            if(direction)
++                decoder = ssl_state->s_to_c_n;
++            else
++                decoder = ssl_state->c_to_s_n;
++            memset(out,0,2048);
++            ssl_decode_rec_data(ssl_state,decoder,ct,version,data,data_len,out,&outl);
++            printf("out:%s",out);
++#endif
+             break;
+ 
+         case SSLV3_HANDSHAKE_PROTOCOL:
+@@ -1247,7 +2468,8 @@ static int SSLv3Decode(uint8_t direction, SSLState *ssl_state,
+                 return -1;
+             }
+ 
+-            retval = SSLv3ParseHandshakeProtocol(ssl_state, input + parsed, input_len);
++            retval = SSLv3ParseHandshakeProtocol(ssl_state, input + parsed,
++                                                 input_len, direction);
+             if (retval < 0) {
+                 SSLSetEvent(ssl_state,
+                         TLS_DECODER_EVENT_INVALID_HANDSHAKE_MESSAGE);
+@@ -1758,10 +2980,24 @@ static int SSLRegisterPatternsForProtocolDetection(void)
+ /**
+  * \brief Function to register the SSL protocol parser and other functions
+  */
++#ifdef HAVE_TLS_DECODE
++const char *rsa_keyfile = "./server.key";
++#endif
+ void RegisterSSLParsers(void)
+ {
+     char *proto_name = "tls";
+ 
++#ifdef HAVE_TLS_DECODE
++    SSL_library_init();
++    OpenSSL_add_all_algorithms();
++    SSL_CTX *ssl_ctx = SSL_CTX_new(SSLv23_server_method());
++    if(rsa_keyfile)
++    {
++        SSL_CTX_use_PrivateKey_file(ssl_ctx,rsa_keyfile,SSL_FILETYPE_PEM);
++    }
++    ssl_conn = SSL_new(ssl_ctx);
++    X509V3_add_standard_extensions();
++#endif
+     /** SSLv2  and SSLv23*/
+     if (AppLayerProtoDetectConfProtoDetectionEnabled("tcp", proto_name)) {
+         AppLayerProtoDetectRegisterProtocol(ALPROTO_TLS, proto_name);
+diff --git a/src/app-layer-ssl.h b/src/app-layer-ssl.h
+index d2279e2..7a2f95d 100644
+--- a/src/app-layer-ssl.h
++++ b/src/app-layer-ssl.h
+@@ -30,6 +30,11 @@
+ #include "app-layer-parser.h"
+ #include "decode-events.h"
+ #include "queue.h"
++#include <openssl/ssl.h>
++#include <openssl/hmac.h>
++#include <openssl/evp.h>
++#include <openssl/md5.h>
++#include <openssl/x509v3.h>
+ 
+ enum {
+     /* TLS protocol messages */
+@@ -96,6 +101,12 @@ enum {
+ /* flag to indicate that handshake is done */
+ #define SSL_AL_FLAG_HANDSHAKE_DONE              0x80000
+ 
++/* A session ID in the Client Hello message, indicating the client
++   wants to resume a session */
++#define SSL_AL_FLAG_SSL_CLIENT_SESSION_ID       0x100000
++/* Session resumed without a full handshake */
++#define SSL_AL_FLAG_SESSION_RESUMED             0x200000
++
+ /* config flags */
+ #define SSL_TLS_LOG_PEM                         (1 << 0)
+ 
+@@ -123,6 +134,150 @@ typedef struct SSLCertsChain_ {
+ } SSLCertsChain;
+ 
+ 
++#ifdef HAVE_TLS_DECODE
++#ifdef R_TRACE_ERRORS
++#define REPORT_ERROR_(caller,a) fprintf(stderr,"%s: error %d at %s:%d (function %s)\n", \
++            caller,a,__FILE__,__LINE__,__FUNCTION__)
++#else
++#define REPORT_ERROR_(caller,a)
++#endif  
++
++#ifndef ERETURN
++#define ERETURN(a) do {int _r=a; if(!_r) _r=-1; REPORT_ERROR_("ERETURN",_r); return(_r);} while(0)
++#endif
++
++#ifndef ABORT
++#define ABORT(a) do { int _r=a; if(!_r) _r=-1; REPORT_ERROR_("ABORT",_r); _status=_r; goto abort;} while(0)
++#endif
++
++#ifndef MIN
++#define MIN(a,b) ((a)>(b))?(b):(a)
++#endif
++
++#ifndef MAX
++#define MAX(a,b) ((b)>(a))?(b):(a)
++#endif
++#ifndef R_DEFINED_UCHAR
++typedef unsigned char UCHAR;
++#endif
++#ifndef R_DEFINED_UINT4
++#ifndef SIZEOF_UNSIGNED_INT
++typedef unsigned int UINT4;
++#else
++# if (SIZEOF_UNSIGNED_INT==4)
++typedef unsigned int UINT4;
++# elif (SIZEOF_UNSIGNED_SHORT==4)
++typedef unsigned short UINT4;
++# elif (SIZEOF_UNSIGNED_LONG==4)
++typedef unsigned long UINT4;
++# else
++# error no type for UINT4
++# endif
++#endif
++#endif
++
++#ifndef R_DEFINED_UINT8
++#ifndef SIZEOF_UNSIGNED_LONG
++typedef unsigned long UINT8;
++#else
++# if (SIZEOF_UNSIGNED_INT==8)
++typedef unsigned int UINT8;
++# elif (SIZEOF_UNSIGNED_SHORT==8)
++typedef unsigned short UINT8;
++# elif (SIZEOF_UNSIGNED_LONG==8)
++typedef unsigned long UINT8;
++# elif (SIZEOF_UNSIGNED_LONG_LONG==8)
++typedef unsigned long long UINT8;
++# elif defined (_WIN32) && defined (_MSC_VER)
++typedef unsigned __int64 UINT8;
++# else
++# error no type for UINT8
++# endif
++#endif
++#endif
++typedef struct SSL_CipherSuite_ {
++     int number;
++     int kex;
++     int sig;
++     int enc;
++     int block;
++     int bits;
++     int eff_bits;
++     int dig;
++     int dig_len;
++     int export;
++} SSL_CipherSuite;
++
++#define R_NO_MEMORY      1 /*out of memory*/
++#define R_NOT_FOUND	 2 /*Item not found*/
++#define R_INTERNAL	 3 /*Unspecified internal error*/
++#define R_ALREADY	 4 /*Action already done*/
++#define R_EOD            5 /*end of data*/
++#define R_BAD_ARGS       6 /*Bad arguments*/
++#define R_BAD_DATA	 7 /*Bad data*/
++#define R_WOULDBLOCK     8 /*Operation would block */
++
++#define KEX_RSA		0x10
++#define KEX_DH		0x11
++
++#define SIG_RSA		0x20
++#define SIG_DSS		0x21
++#define SIG_NONE	0x22
++
++#define ENC_DES		0x30
++#define ENC_3DES	0x31
++#define ENC_RC4		0x32
++#define ENC_RC2		0x33
++#define ENC_IDEA	0x34
++#define ENC_AES128	0x35
++#define ENC_AES256	0x36
++#define ENC_CAMELLIA128	0x37
++#define ENC_CAMELLIA256	0x38
++#define ENC_SEED	0x39
++#define ENC_NULL	0x3a
++#define ENC_AES128_GCM  0x3b
++#define ENC_AES256_GCM  0x3c
++
++#define SSL_NO_DATA 1
++#define SSL_BAD_CONTENT_TYPE 2
++#define SSL_BAD_PMS      3
++#define SSL_CANT_DO_CIPHER   4
++#define SSL_NO_DECRYPT       5
++#define SSL_BAD_MAC          6
++#define SSL_BAD_DATA         7
++
++
++#define DIG_MD5		0x40
++#define DIG_SHA		0x41
++#define DIG_SHA224	0x42  /* Not sure why EKR didn't follow RFC for */
++#define DIG_SHA256	0x43  /* these values, but whatever, just adding on */
++#define DIG_SHA384	0x44
++#define DIG_SHA512	0x45
++#define DBG(a) 
++
++
++#define INIT_DATA(a,b,c) (a).data=b; (a).len=c
++#define ATTACH_DATA(a,b) (a).data=b; (a).len=sizeof(b)
++#define ZERO_DATA(a) (a).data=0; (a).len=0
++
++
++#define IS_AEAD_CIPHER(cs) (cs->enc==0x3b||cs->enc==0x3c)
++
++typedef struct Data_ {
++         UCHAR *data;
++         unsigned int len;
++} Data;
++
++typedef struct ssl_rec_decoder_ {
++     SSL_CipherSuite *cs;
++     Data *mac_key;
++     Data *implicit_iv; /* for AEAD ciphers */
++     Data *write_key; /* for AEAD ciphers */
++     EVP_CIPHER_CTX *evp;
++     UINT4 seq;
++}ssl_rec_decoder;
++#endif
++
+ typedef struct SSLStateConnp_ {
+     /* record length */
+     uint32_t record_length;
+@@ -170,12 +325,23 @@ typedef struct SSLStateConnp_ {
+     uint32_t trec_pos;
+ } SSLStateConnp;
+ 
++#ifdef HAVE_TLS_DECODE
++typedef struct ssl_extensions_ {
++      int encrypt_then_mac;       
++      int extended_master_secret; 
++} ssl_extensions;
++#endif
++
+ /**
+  * \brief SSLv[2.0|3.[0|1|2|3]] state structure.
+  *
+  *        Structure to store the SSL state values.
+  */
+ typedef struct SSLState_ {
++#ifdef HAVE_TLS_DECODE
++    SSL_CTX *ssl_ctx;
++    SSL *ssl;
++#endif
+     Flow *f;
+ 
+     /* holds some state flags we need */
+@@ -184,18 +350,34 @@ typedef struct SSLState_ {
+     /* specifies which loggers are done logging */
+     uint32_t logged;
+ 
++    /* MPM/prefilter Id's */
++    uint64_t mpm_ids;
++
+     /* there might be a better place to store this*/
+     uint16_t hb_record_len;
+ 
+     uint16_t events;
+ 
+     uint32_t current_flags;
+-
++#ifdef HAVE_TLS_DECODE
++	uint16_t cipher_suit;
++#endif
+     SSLStateConnp *curr_connp;
+ 
++#ifdef HAVE_TLS_DECODE
++    Data *master_key;
++    uint8_t master_key_len;
++#endif
+     SSLStateConnp client_connp;
+     SSLStateConnp server_connp;
+-
++#ifdef HAVE_TLS_DECODE
++    ssl_extensions extensions;
++    Data *client_random;
++    Data *server_random;
++    ssl_rec_decoder *c_to_s_n;
++    ssl_rec_decoder *s_to_c_n;
++    struct SSL_CipherSuite_ *cs;
++#endif
+     DetectEngineState *de_state;
+     AppLayerDecoderEvents *decoder_events;
+ } SSLState;
