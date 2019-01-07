@@ -1,4 +1,5 @@
-## 青松旁路解密TLS项目
+## 全流量镜像旁路解密Https TLS 1.0 
+
 基于suricata旁路解密的tls-patch，支持suricata3.0-4.0版本。
 
 依赖openssl-1.0.2o(https://www.openssl.org/source/old/1.0.2/openssl-1.0.2o.tar.gz)
